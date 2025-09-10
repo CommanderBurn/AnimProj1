@@ -50,10 +50,11 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, a3f64 dt)
 {
 	a3f64 t, t0, t1;
-	clipCtrl->playback_sec *= dt;
+	a3boolean useFlags = false;
+	//clipCtrl->playback_sec = -1;
 	t0 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex0].time_sec;
 	t1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
-	clipCtrl->clipTime_sec += clipCtrl->playback_sec;
+	clipCtrl->clipTime_sec += clipCtrl->playback_sec * dt;
 	t = clipCtrl->clipTime_sec;
 
 
@@ -75,10 +76,21 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, a3f64 dt)
 				t1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
 				clipCtrl->clipTime_sec = t - clipCtrl->clip->duration_sec;
 				t = clipCtrl->clipTime_sec;
-				switch (clipCtrl->clip->transitionForward->flag)
+				if (useFlags)
 				{
-				case 0:
+					switch (clipCtrl->clip->transitionForward->flag)
+					{
+					case 0:
+						clipCtrl->playback_sec = 0;
+						break;
+					case 1:
+						clipCtrl->playback_sec = 1;
+						break;
+					case 2:
+						clipCtrl->playback_sec = -1;
+						break;
 
+					}
 				}
 			}
 			while (t >= t1 || t < t0)
@@ -97,6 +109,23 @@ a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, a3f64 dt)
 				t1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
 				clipCtrl->clipTime_sec = t + clipCtrl->clip->duration_sec;
 				t = clipCtrl->clipTime_sec;
+				if (useFlags)
+				{
+					switch (clipCtrl->clip->transitionReverse->flag)
+					{
+					case 0:
+						clipCtrl->playback_sec = 0;
+						break;
+					case 1:
+						clipCtrl->playback_sec = -1;
+						break;
+					case 2:
+						clipCtrl->playback_sec = 1;
+						break;
+
+
+					}
+				}
 			}
 			while (t >= t1 || t < t0)
 			{
