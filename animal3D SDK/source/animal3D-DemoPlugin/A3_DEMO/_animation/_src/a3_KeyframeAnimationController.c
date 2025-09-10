@@ -49,14 +49,64 @@ a3i32 a3clipControllerInit(a3_ClipController* clipCtrl_out, const a3byte ctrlNam
 // update clip controller
 a3i32 a3clipControllerUpdate(a3_ClipController* clipCtrl, a3f64 dt)
 {
+	a3f64 t, t0, t1;
+	clipCtrl->playback_sec *= dt;
+	t0 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex0].time_sec;
+	t1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
+	clipCtrl->clipTime_sec += clipCtrl->playback_sec;
+	t = clipCtrl->clipTime_sec;
+
+
 	if (clipCtrl && clipCtrl->clipPool)
 	{
 //-----------------------------------------------------------------------------
 //****TO-DO-ANIM-PROJECT-1: IMPLEMENT ME
 //-----------------------------------------------------------------------------
+		if (clipCtrl->playback_sec == 0)
+		{
+			return 0;
+		}
+		if (clipCtrl->playback_sec > 0)
+		{
+			if (t > clipCtrl->clip->duration_sec)
+			{
+				clipCtrl->keyframeIndex = clipCtrl->clip->keyframeIndex_first;
+				t0 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex0].time_sec;
+				t1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
+				clipCtrl->clipTime_sec = t - clipCtrl->clip->duration_sec;
+				t = clipCtrl->clipTime_sec;
+				switch (clipCtrl->clip->transitionForward->flag)
+				{
+				case 0:
 
-
-
+				}
+			}
+			while (t >= t1 || t < t0)
+			{
+				clipCtrl->keyframeIndex += 1;
+				t0 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex0].time_sec;
+				t1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
+			}
+		}
+		else
+		{
+			if (t < 0)
+			{
+				clipCtrl->keyframeIndex = clipCtrl->clip->keyframeIndex_final;
+				t0 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex0].time_sec;
+				t1 = clipCtrl->clipPool->sample[clipCtrl->keyframe[clipCtrl->keyframeIndex].sampleIndex1].time_sec;
+				clipCtrl->clipTime_sec = t + clipCtrl->clip->duration_sec;
+				t = clipCtrl->clipTime_sec;
+			}
+			while (t >= t1 || t < t0)
+			{
+				clipCtrl->keyframeIndex -= 1;
+				t0 = clipCtrl->clipPool->sample[clipCtrl->keyframe->sampleIndex0 + clipCtrl->keyframeIndex].time_sec;
+				t1 = clipCtrl->clipPool->sample[clipCtrl->keyframe->sampleIndex1 + clipCtrl->keyframeIndex].time_sec;
+			}
+		}
+		clipCtrl->clipParam = (t) / clipCtrl->clip->duration_sec;
+		clipCtrl->keyframeParam = (t - t0) / (t1 - t0);
 //-----------------------------------------------------------------------------
 //****END-TO-DO-PROJECT-1
 //-----------------------------------------------------------------------------
