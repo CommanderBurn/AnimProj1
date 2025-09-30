@@ -112,7 +112,8 @@ a3i32 a3hierarchyPoseGroupLoadBinary(a3_HierarchyPoseGroup* poseGroup, a3_FileSt
 //-----------------------------------------------------------------------------
 //****TO-DO-ANIM-OPTIONAL: IMPLEMENT ME
 //-----------------------------------------------------------------------------
-				
+				//fread
+				// ->create
 
 
 //-----------------------------------------------------------------------------
@@ -140,7 +141,8 @@ a3i32 a3hierarchyPoseGroupSaveBinary(a3_HierarchyPoseGroup const* poseGroup, a3_
 //-----------------------------------------------------------------------------
 //****TO-DO-ANIM-OPTIONAL: IMPLEMENT ME
 //-----------------------------------------------------------------------------
-				
+				//fwrite
+				// -> 
 
 
 //-----------------------------------------------------------------------------
@@ -228,7 +230,10 @@ a3i32 a3hierarchyStateUpdateLocalInverse(const a3_HierarchyState* state)
 //-----------------------------------------------------------------------------
 //****TO-DO-ANIM-PROJECT-2: IMPLEMENT ME
 //-----------------------------------------------------------------------------
-		
+		for (i = 0; i < state->hierarchy->numNodes; ++i)
+		{
+			a3real4x4TransformInverse(state->localSpaceInv->hpose_base[i].transformMat.m, state->localSpace->hpose_base[i].transformMat.m);
+		}
 
 
 //-----------------------------------------------------------------------------
@@ -249,7 +254,10 @@ a3i32 a3hierarchyStateUpdateObjectInverse(const a3_HierarchyState* state)
 //****TO-DO-ANIM-PROJECT-2: IMPLEMENT ME
 //-----------------------------------------------------------------------------
 		
-
+		for (i = 0; i < state->hierarchy->numNodes; ++i)
+		{
+			a3real4x4TransformInverse(state->objectSpaceInv->hpose_base[i].transformMat.m, state->objectSpace->hpose_base[i].transformMat.m);
+		}
 
 //-----------------------------------------------------------------------------
 //****END-TO-DO-PROJECT-2
@@ -268,7 +276,10 @@ a3i32 a3hierarchyStateUpdateObjectBindToCurrent(const a3_HierarchyState* state, 
 //-----------------------------------------------------------------------------
 //****TO-DO-ANIM-PROJECT-2: IMPLEMENT ME
 //-----------------------------------------------------------------------------
-		
+		for (i = 0; i < state->hierarchy->numNodes; ++i)
+		{
+			a3real4x4Product(state->objectSpaceBindToCurrent->hpose_base[i].transformMat.m, state_bind->objectSpace->hpose_base[i].transformMat.m,state_bind->objectSpaceInv->hpose_base[i].transformMat.m);
+		}
 
 
 //-----------------------------------------------------------------------------
@@ -287,18 +298,147 @@ a3i32 a3hierarchyPoseGroupLoadHTR(a3_HierarchyPoseGroup* poseGroup_out, a3_Hiera
 {
 	if (poseGroup_out && !poseGroup_out->hierarchy && hierarchy_out && !hierarchy_out->nodes && resourceFilePath && *resourceFilePath)
 	{
-//-----------------------------------------------------------------------------
-//****TO-DO-ANIM-PROJECT-2: IMPLEMENT ME
-//-----------------------------------------------------------------------------
-		
+		//-----------------------------------------------------------------------------
+		//****TO-DO-ANIM-PROJECT-2: IMPLEMENT ME
+		//-----------------------------------------------------------------------------
+				//Read in file
+				//Get the header to determine poseGroup
+				//Load file data to the node of hierarchy
+				// ->Node, TranslationX, TranslationY, TranslationZ, RotationX, RotationY, RotationZ, Length
 
 
-//-----------------------------------------------------------------------------
-//****END-TO-DO-PROJECT-2
-//-----------------------------------------------------------------------------
+				//Source: MotionCaptureFileFormatsExplained.pdf
+				//Shout out to Tristan for his help in tutoring.
+		FILE* file = fopen(resourceFilePath, "r");
+			char line[256];
+			fgets(line, 256, file);
+
+			if (strstr(line,"[Header]"))
+			{
+				a3real conversion;
+				while (!strstr(line,"[SegmentNames&Hierarchy]"))
+				{
+					
+					fgets(line, 256, file);
+					if (strstr(line, "FileType"))
+					{
+						if (!strstr(line, "HTR"))
+						{
+							return -1;
+						}
+					}
+					if (strstr(line, "DataType"))
+					{
+						if (!strstr(line, "HTRS"))
+						{
+							return -1;
+						}
+					}
+					if (strstr(line, "FileVersion"))
+					{
+						if (!strstr(line, "1"))
+						{
+							return -1;
+						}
+					}
+					a3ui32 numNodes;
+					if (strstr(line, "NumSegments"))
+					{
+						char num[256];
+						sscanf(line, "%s %d", num, &numNodes);
+						a3hierarchyCreate(hierarchy_out, numNodes, NULL);
+					}
+					a3ui32 numFrames;
+					if (strstr(line, "NumFrames"))
+					{
+						char num[256];
+						sscanf(line, "%s %d", num, &numFrames);
+						a3hierarchyPoseGroupCreate(poseGroup_out, hierarchy_out, numFrames);
+					}
+					if (strstr(line, "EulerRotationOrder"))
+					{
+						*poseGroup_out->order = 5;
+					}
+
+					if (strstr(line, "CalibrationUnits"))
+					{
+						if (strstr(line, "mm"))
+						{
+							conversion = 0.1f;
+						}
+					}
+					if (strstr(line, "RotationUnits"))
+					{
+						if (strstr(line, "Degrees"))
+						{
+							//Insert degree logic
+						}
+					}
+					if (strstr(line, "GlobalAxisofGravity"))
+					{
+						if (strstr(line, "Y"))
+						{
+							//SetVerticalGravity
+						}
+					}
+					if (strstr(line, "BoneLengthAxisY"))
+					{
+						//Insert Length Logic
+					}
+					a3real scaleFactor;
+					if (strstr(line, "ScaleFactor"))
+					{
+						char num[256];
+						sscanf(line, "%s %f", &num, &scaleFactor);
+						conversion *= scaleFactor;
+					}
+
+				}
+
+			}
+			int i = 0;
+			if (strstr(line,"[SegmentNames&Hierarchy]"))
+			{
+				char child[256];
+				char parent[256];
+				fgets(line, 256, file);
+				a3ret parIndex;
+				while (!strstr(line, "[BasePosition]"))
+				{
+						sscanf(line, "%s %s", child , parent);
+						parIndex = a3hierarchyGetNodeIndex(hierarchy_out, parent);
+						a3hierarchySetNode(hierarchy_out, i,parIndex, child);
+						i++;
+						fgets(line, 256, file);
+					
+				}
+			}
+			if (strstr(line, "[BasePosition]"))
+			{
+					//fgets(line,256, file);
+					char node[256];
+					a3f32 Tx, Ty, Tz, Rx, Ry, Rz, S;
+					while (fscanf(file, "%s %f %f %f %f %f %f %f", node,&Tx,&Ty,&Tz,&Rx,&Ry,&Rz,&S))
+					{
+						if (strstr(node, "#"))
+							return 1;
+						a3ret currPose = a3hierarchyGetNodeIndex(hierarchy_out, node);
+						a3spatialPoseSetTranslation(poseGroup_out->pose + currPose, Tx, Ty, Tz);
+						a3spatialPoseSetRotation(poseGroup_out->pose + currPose,Rx,Ry,Rz );
+						a3spatialPoseSetScale(poseGroup_out->pose + currPose,S,S,S);
+
+					}
+
+					//Fill in variable logic
+			}
+
+
 	}
 	return -1;
 }
+//-----------------------------------------------------------------------------
+//****END-TO-DO-PROJECT-2
+//-----------------------------------------------------------------------------
 
 // load BVH file, read and store complete pose group and hierarchy
 a3i32 a3hierarchyPoseGroupLoadBVH(a3_HierarchyPoseGroup* poseGroup_out, a3_Hierarchy* hierarchy_out, const a3byte* resourceFilePath)
