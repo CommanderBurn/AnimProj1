@@ -284,7 +284,7 @@ static void a3kinematicsResolvePostIK(a3_HierarchyState* activeHS,
 //****END-TO-DO-PROJECT-3
 //-----------------------------------------------------------------------------
 }
-
+#include <stdio.h>
 void a3kinematicsUpdateLookAtIK(a3_HierarchyState const* sceneGraphState,
 	a3_HierarchyState* activeHS, a3_HierarchyState const* baseHS, a3_HierarchyPoseGroup const* poseGroup,
 	a3ui32 const sceneGraphIndex_hierarchyObj, a3ui32 const sceneGraphIndex_effector,
@@ -308,16 +308,18 @@ void a3kinematicsUpdateLookAtIK(a3_HierarchyState const* sceneGraphState,
 	//First:
 	//Move eveything into  the space of the skeleton/hierarchy
 	a3real4x4 product;
-	a3real4x4Product(product, activeHS->objectSpace->hpose_base[hierarchyObjIndex_affected].transformMat.m, sceneGraphState->localSpace->hpose_base[sceneGraphIndex_hierarchyObj].transformMat.m);
-	a3real4x4SetReal4x4(sceneGraphState->objectSpace->hpose_base[sceneGraphIndex_effector].transformMat.m, product);
+	a3real4x4Product(product, activeHS->objectSpaceInv->hpose_base[hierarchyObjIndex_affected].transformMat.m, sceneGraphState->objectSpace->hpose_base[sceneGraphIndex_hierarchyObj].transformMat.m);
+	a3real4x4SetReal4x4(sceneGraphState->localSpace->hpose_base[sceneGraphIndex_effector].transformMat.m, product);
+
 	// look at target
 	//Main:
 	//Solver: build an orthonormal basis
 	//Joint-to-object
 	//1. Direction basis = target - joint position
 	a3real3 dir;
-	a3vec4 lookPos = sceneGraphState->objectSpace->hpose_base[sceneGraphIndex_effector].transformMat.v0;
-	a3vec4 eyePos = activeHS->objectSpace->hpose_base[hierarchyObjIndex_affected].transformMat.v0;
+	a3vec4 lookPos = sceneGraphState->localSpace->hpose_base[sceneGraphIndex_effector].transformMat.v3;
+	printf("The value of myInteger is: %f\n", lookPos.x);
+	a3vec4 eyePos = activeHS->objectSpace->hpose_base[hierarchyObjIndex_affected].transformMat.v3;
 	a3real3Diff(dir,lookPos.v,eyePos.v);
 	a3real3Normalize(dir);
 	//2. side basis = known up x direction basis
