@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\..\ServerTest.uproject" />
+    <Filter Include="Source">
+      <UniqueIdentifier>{F31BBDD1-B3E8-3BCC-9652-680E16935819}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\ServerTest.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\ServerTestClient.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\ServerTestEditor.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\Source\ServerTestServer.Target.cs">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="..\..\.vsconfig" />
+    <Filter Include="Config">
+      <UniqueIdentifier>{FA535FFB-25E1-3D20-B416-52F9BE21E06E}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Config\DefaultEditor.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEditorPerProjectUserSettings.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultEngine.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultGame.ini">
+      <Filter>Config</Filter>
+    </None>
+    <None Include="..\..\Config\DefaultInput.ini">
+      <Filter>Config</Filter>
+    </None>
+    <Filter Include="Source\ServerTest">
+      <UniqueIdentifier>{02D5B414-2997-394E-B1AF-F6E48FAC8892}</UniqueIdentifier>
+    </Filter>
+    <None Include="..\..\Source\ServerTest\ServerTest.Build.cs">
+      <Filter>Source\ServerTest</Filter>
+    </None>
+    <ClCompile Include="..\..\Source\ServerTest\ServerTest.cpp">
+      <Filter>Source\ServerTest</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\ServerTest.h">
+      <Filter>Source\ServerTest</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\ServerTestCameraManager.cpp">
+      <Filter>Source\ServerTest</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\ServerTestCameraManager.h">
+      <Filter>Source\ServerTest</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\ServerTestCharacter.cpp">
+      <Filter>Source\ServerTest</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\ServerTestCharacter.h">
+      <Filter>Source\ServerTest</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\ServerTestGameMode.cpp">
+      <Filter>Source\ServerTest</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\ServerTestGameMode.h">
+      <Filter>Source\ServerTest</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\ServerTestPlayerController.cpp">
+      <Filter>Source\ServerTest</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\ServerTestPlayerController.h">
+      <Filter>Source\ServerTest</Filter>
+    </ClInclude>
+    <Filter Include="Source\ServerTest\Variant_Horror">
+      <UniqueIdentifier>{F0462021-AE7F-304A-88A7-CA9A94EBADEA}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Horror\HorrorCharacter.cpp">
+      <Filter>Source\ServerTest\Variant_Horror</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Horror\HorrorCharacter.h">
+      <Filter>Source\ServerTest\Variant_Horror</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Horror\HorrorGameMode.cpp">
+      <Filter>Source\ServerTest\Variant_Horror</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Horror\HorrorGameMode.h">
+      <Filter>Source\ServerTest\Variant_Horror</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Horror\HorrorPlayerController.cpp">
+      <Filter>Source\ServerTest\Variant_Horror</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Horror\HorrorPlayerController.h">
+      <Filter>Source\ServerTest\Variant_Horror</Filter>
+    </ClInclude>
+    <Filter Include="Source\ServerTest\Variant_Horror\UI">
+      <UniqueIdentifier>{BC1A11B4-6572-3FF4-98FB-55F0D2B621FF}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Horror\UI\HorrorUI.cpp">
+      <Filter>Source\ServerTest\Variant_Horror\UI</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Horror\UI\HorrorUI.h">
+      <Filter>Source\ServerTest\Variant_Horror\UI</Filter>
+    </ClInclude>
+    <Filter Include="Source\ServerTest\Variant_Shooter">
+      <UniqueIdentifier>{D055A070-750A-3AA4-8061-0C18143D9382}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\ShooterCharacter.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\ShooterCharacter.h">
+      <Filter>Source\ServerTest\Variant_Shooter</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\ShooterGameMode.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\ShooterGameMode.h">
+      <Filter>Source\ServerTest\Variant_Shooter</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\ShooterPlayerController.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\ShooterPlayerController.h">
+      <Filter>Source\ServerTest\Variant_Shooter</Filter>
+    </ClInclude>
+    <Filter Include="Source\ServerTest\Variant_Shooter\AI">
+      <UniqueIdentifier>{7DFFF72E-4E05-3341-B980-265A78D60F79}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\AI\EnvQueryContext_Target.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter\AI</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\AI\EnvQueryContext_Target.h">
+      <Filter>Source\ServerTest\Variant_Shooter\AI</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\AI\ShooterAIController.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter\AI</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\AI\ShooterAIController.h">
+      <Filter>Source\ServerTest\Variant_Shooter\AI</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\AI\ShooterNPC.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter\AI</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\AI\ShooterNPC.h">
+      <Filter>Source\ServerTest\Variant_Shooter\AI</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\AI\ShooterStateTreeUtility.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter\AI</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\AI\ShooterStateTreeUtility.h">
+      <Filter>Source\ServerTest\Variant_Shooter\AI</Filter>
+    </ClInclude>
+    <Filter Include="Source\ServerTest\Variant_Shooter\UI">
+      <UniqueIdentifier>{BD8F9E43-470E-3B59-985D-C56FE35C3C58}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\UI\ShooterBulletCounterUI.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter\UI</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\UI\ShooterBulletCounterUI.h">
+      <Filter>Source\ServerTest\Variant_Shooter\UI</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\UI\ShooterUI.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter\UI</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\UI\ShooterUI.h">
+      <Filter>Source\ServerTest\Variant_Shooter\UI</Filter>
+    </ClInclude>
+    <Filter Include="Source\ServerTest\Variant_Shooter\Weapons">
+      <UniqueIdentifier>{D8E1CEAC-88B8-352B-8671-68D5A8315BB7}</UniqueIdentifier>
+    </Filter>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\Weapons\ShooterPickup.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter\Weapons</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\Weapons\ShooterPickup.h">
+      <Filter>Source\ServerTest\Variant_Shooter\Weapons</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\Weapons\ShooterProjectile.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter\Weapons</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\Weapons\ShooterProjectile.h">
+      <Filter>Source\ServerTest\Variant_Shooter\Weapons</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\Weapons\ShooterWeapon.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter\Weapons</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\Weapons\ShooterWeapon.h">
+      <Filter>Source\ServerTest\Variant_Shooter\Weapons</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\Source\ServerTest\Variant_Shooter\Weapons\ShooterWeaponHolder.cpp">
+      <Filter>Source\ServerTest\Variant_Shooter\Weapons</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\Source\ServerTest\Variant_Shooter\Weapons\ShooterWeaponHolder.h">
+      <Filter>Source\ServerTest\Variant_Shooter\Weapons</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

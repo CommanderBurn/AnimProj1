@@ -1,0 +1,24 @@
+{
+	"Targets": [
+		{
+			"Name": "ServerTest",
+			"Path": "..\\Source\\ServerTest.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "ServerTestClient",
+			"Path": "..\\Source\\ServerTestClient.Target.cs",
+			"Type": "Client"
+		},
+		{
+			"Name": "ServerTestEditor",
+			"Path": "..\\Source\\ServerTestEditor.Target.cs",
+			"Type": "Editor"
+		},
+		{
+			"Name": "ServerTestServer",
+			"Path": "..\\Source\\ServerTestServer.Target.cs",
+			"Type": "Server"
+		}
+	]
+}
