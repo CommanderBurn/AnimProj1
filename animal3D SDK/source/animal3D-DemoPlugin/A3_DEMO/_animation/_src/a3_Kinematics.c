@@ -266,25 +266,28 @@ static void a3kinematicsResolvePostIK(a3_HierarchyState* activeHS,
 //-----------------------------------------------------------------------------
 
 	a3real4x4SetReal4x4(activeHS->objectSpace->hpose_base[nodeIndex].transformMat.m, j2obj);
-	a3hierarchyStateUpdateObjectInverse(activeHS);
-	a3hierarchyStateUpdateLocalInverse(activeHS);
+	
+	a3real4x4GetInverse(activeHS->objectSpaceInv->hpose_base[nodeIndex].transformMat.m, j2obj);
 
-	//Reverse conversion
-	a3hierarchyPoseRestore(activeHS->localSpace,
-		activeHS->hierarchy->numNodes,
-		poseGroup->channel,
-		poseGroup->order);
+	a3ui32 parentIndex = activeHS->hierarchy->nodes[nodeIndex].parentIndex;
+	
+	a3real4x4Product(activeHS->localSpace->hpose_base[nodeIndex].transformMat.m, activeHS->objectSpaceInv->hpose_base[parentIndex].transformMat.m, j2obj);
+
+	a3spatialPoseRestore
+	(&activeHS->localSpace->hpose_base[nodeIndex],
+		poseGroup->channel[nodeIndex],
+		poseGroup->order[nodeIndex]);
 	//Deconcat
-	a3hierarchyPoseDeconcat(activeHS->animPose,	// local: goal to calculate
-		activeHS->localSpace,						// holds current sample pose
-		baseHS->localSpace,						// holds base pose (animPose is all identity poses)
-		activeHS->hierarchy->numNodes);
+	a3spatialPoseDeconcat
+	(&activeHS->animPose->hpose_base[nodeIndex],	// local: goal to calculate
+		&activeHS->localSpace->hpose_base[nodeIndex],						// holds current sample pose
+		&baseHS->localSpace->hpose_base[nodeIndex]						// holds base pose (animPose is all identity poses)
+		);
 
 //-----------------------------------------------------------------------------
 //****END-TO-DO-PROJECT-3
 //-----------------------------------------------------------------------------
 }
-#include <stdio.h>
 void a3kinematicsUpdateLookAtIK(a3_HierarchyState const* sceneGraphState,
 	a3_HierarchyState* activeHS, a3_HierarchyState const* baseHS, a3_HierarchyPoseGroup const* poseGroup,
 	a3ui32 const sceneGraphIndex_hierarchyObj, a3ui32 const sceneGraphIndex_effector,
@@ -308,7 +311,9 @@ void a3kinematicsUpdateLookAtIK(a3_HierarchyState const* sceneGraphState,
 	//First:
 	//Move eveything into  the space of the skeleton/hierarchy
 	a3real4x4 product;
-	a3real4x4Product(product, activeHS->objectSpaceInv->hpose_base[hierarchyObjIndex_affected].transformMat.m, sceneGraphState->objectSpace->hpose_base[sceneGraphIndex_hierarchyObj].transformMat.m);
+
+	//a3ui32 parentIndex = sceneGraphState->hierarchy->nodes[sceneGraphIndex_hierarchyObj].parentIndex;
+	a3real4x4Product(product, sceneGraphState->objectSpaceInv->hpose_base[sceneGraphIndex_hierarchyObj].transformMat.m, sceneGraphState->objectSpace->hpose_base[sceneGraphIndex_effector].transformMat.m);
 	a3real4x4SetReal4x4(sceneGraphState->localSpace->hpose_base[sceneGraphIndex_effector].transformMat.m, product);
 
 	// look at target
@@ -318,7 +323,6 @@ void a3kinematicsUpdateLookAtIK(a3_HierarchyState const* sceneGraphState,
 	//1. Direction basis = target - joint position
 	a3real3 dir;
 	a3vec4 lookPos = sceneGraphState->localSpace->hpose_base[sceneGraphIndex_effector].transformMat.v3;
-	printf("The value of myInteger is: %f\n", lookPos.x);
 	a3vec4 eyePos = activeHS->objectSpace->hpose_base[hierarchyObjIndex_affected].transformMat.v3;
 	a3real3Diff(dir,lookPos.v,eyePos.v);
 	a3real3Normalize(dir);
@@ -327,17 +331,18 @@ void a3kinematicsUpdateLookAtIK(a3_HierarchyState const* sceneGraphState,
 	a3real3Set(upVec, 0, 1, 0);
 	
 	a3real3 side;
-	a3real3Cross(side, dir, upVec);
+	a3real3Cross(side, upVec, dir);
 	a3real3Normalize(side);
 	//3. up basis = direction x side
 	a3real3 up;
 	a3real3Cross(up, dir, side);
 	//4. normalizle all
-	a3real3x3 R;
-	a3real3x3SetMajors(R,side, up, dir);
-	a3real4x4SetReal3x3(product, R);
 	//Last:
-	a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected,product);
+	a3real3x3 R;
+	a3real3x3SetMajors(R, side, up, dir);
+	a3real4x4SetReal3x3(product, R);
+	a3real4SetReal4(product[3], activeHS->objectSpace->hpose_base[hierarchyObjIndex_affected].transformMat.v3.v);
+	a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected, product);
 
 
 //-----------------------------------------------------------------------------
@@ -372,7 +377,11 @@ void a3kinematicsUpdateLimbIK(a3_HierarchyState const* sceneGraphState,
 	//First:
 	//	wrist
 	//	pole vector constraint
+	a3real4x4 product;
 
+	//a3ui32 parentIndex = sceneGraphState->hierarchy->nodes[sceneGraphIndex_hierarchyObj].parentIndex;
+	a3real4x4Product(product, sceneGraphState->objectSpaceInv->hpose_base[sceneGraphIndex_hierarchyObj].transformMat.m, sceneGraphState->objectSpace->hpose_base[sceneGraphIndex_effector_end].transformMat.m);
+	a3real4x4SetReal4x4(sceneGraphState->localSpace->hpose_base[sceneGraphIndex_effector_end].transformMat.m, product);
 	//Main:
 	//a3real4x4 T;
 	//Solve joint-to-object for end, hinge,base
@@ -381,13 +390,13 @@ void a3kinematicsUpdateLimbIK(a3_HierarchyState const* sceneGraphState,
 	// -> hinge position*
 	
 	//1. base joint to end effector vector (and distance)
-	a3vec3 base = activeHS->objectSpace->hpose_base[hierarchyObjIndex_affected_base].translate.xyz;
-	a3vec3 end = sceneGraphState->localSpace->hpose_base[sceneGraphIndex_effector_end].translate.xyz;
+	a3vec4 base = activeHS->objectSpace->hpose_base[hierarchyObjIndex_affected_base].transformMat.v3;
+	a3vec4 end = sceneGraphState->localSpace->hpose_base[sceneGraphIndex_effector_end].transformMat.v3;
 	a3real3 d;
 	a3real3Diff(d, end.v, base.v);
 	a3real3Normalize(d);
 	//2. base joint to pole vector constaint
-	a3vec3 constraint = sceneGraphState->localSpace->hpose_base[sceneGraphIndex_constraint].translate.xyz;
+	a3vec4 constraint = sceneGraphState->objectSpace->hpose_base[sceneGraphIndex_constraint].transformMat.v3;
 	a3real3 c;
 	a3real3Diff(c, constraint.v, base.v);
 	//3. plane normal = (base to pole) x (base to end)
@@ -403,12 +412,13 @@ void a3kinematicsUpdateLimbIK(a3_HierarchyState const* sceneGraphState,
 	a3real L2 = a3real3Distance(end.v, constraint.v);
 	a3f32 s = 0.5f * (B + L1 + L2);
 	
-	a3real solve = s * (s - B) * (s - L1) * (s - L2);
-	a3real A = a3sqrtf(solve);
-
+	a3f32 solve = s * (s - B) * (s - L1) * (s - L2);
+	
+	a3real A = a3sqrtf(a3absolute(solve));
+	
 	a3real H = (2 * A) / B;
 
-	a3real D = a3sqrtf((L1 * L1) - (H * H));
+	a3real D = a3sqrtf(a3absolute((L1 * L1) - (H * H)));
 
 	a3real3 DProd, HProd;
 	a3real3ProductS(DProd, d, D);
@@ -417,15 +427,16 @@ void a3kinematicsUpdateLimbIK(a3_HierarchyState const* sceneGraphState,
 	a3real3Add(constraint.v, base.v);
 	a3real3Add(constraint.v, DProd);
 	a3real3Add(constraint.v, HProd);
-
+	a3real3x3 R;
+	a3real3x3SetMajors(R, base.v, constraint.v, end.v);
 	//5. "look at" solve shoulder and elbow rotations
-	//a3kinematicsUpdateLookAtIK(sceneGraphState, activeHS, baseHS, poseGroup, sceneGraphIndex_hierarchyObj, sceneGraphIndex_effector_end, hierarchyObjIndex_affected_hinge, basis_hierarchyObj, basis_affected_hinge);
-	//a3kinematicsUpdateLookAtIK(sceneGraphState, activeHS, baseHS, poseGroup, sceneGraphIndex_hierarchyObj, sceneGraphIndex_constraint, hierarchyObjIndex_affected_hinge, basis_hierarchyObj, basis_affected_base);
+	a3kinematicsUpdateLookAtIK(sceneGraphState, activeHS, baseHS, poseGroup, sceneGraphIndex_hierarchyObj, sceneGraphIndex_constraint, hierarchyObjIndex_affected_hinge, basis_hierarchyObj, basis_affected_end);
+	a3kinematicsUpdateLookAtIK(sceneGraphState, activeHS, baseHS, poseGroup, sceneGraphIndex_hierarchyObj, sceneGraphIndex_constraint, hierarchyObjIndex_affected_hinge, basis_hierarchyObj, basis_affected_base);
 	//Last:
-	//	work from root to leaf!!!
-	//a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_base, T);
-	//a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_hinge, T);
-	//a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_end, T);
+	//	work from root to leaf
+	//a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_base, product);
+	//a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_hinge, product);
+	//a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_end, product);
 //-----------------------------------------------------------------------------
 //****END-TO-DO-PROJECT-3
 //-----------------------------------------------------------------------------
