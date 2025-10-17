@@ -406,20 +406,20 @@ void a3kinematicsUpdateLimbIK(a3_HierarchyState const* sceneGraphState,
 	a3vec4 constraint = sceneGraphState->objectSpace->hpose_base[sceneGraphIndex_constraint].transformMat.v3;
 
 
-	a3real3 c;
+	a3real4 c;
 	a3real3Diff(c, constraint.v, base.v);
 	//3. plane normal = (base to pole) x (base to end)
-	a3real3 n;
+	a3real4 n;
 	a3real3Cross(n, c, d);
 
-	a3real3 nNorm;
+	a3real4 nNorm;
 	a3real3SetReal3(nNorm, n);
 	a3real3Normalize(nNorm);
 
-	a3real3 h; //is normalized
+	a3real4 h; //is normalized
 	a3real3Cross(h, nNorm, dNorm);
 
-	a3real3 hNorm;
+	a3real4 hNorm;
 	a3real3SetReal3(hNorm, h);
 	a3real3Normalize(hNorm);
 
@@ -437,47 +437,57 @@ void a3kinematicsUpdateLimbIK(a3_HierarchyState const* sceneGraphState,
 
 	a3real D = a3sqrtf(a3absolute((L1 * L1) - (H * H)));
 
-	a3real3 DProd, HProd;
+	a3real4 DProd, HProd;
 	a3real3ProductS(DProd, dNorm, D);
 	a3real3ProductS(HProd, hNorm, H);
 
-	a3real3 p; //elbow's offset from base effector
+	a3real4 p; //elbow's offset from base effector
 	a3real3Add(p, base.v);
 	a3real3Add(p, DProd);
 	a3real3Add(p, HProd);
 
-	a3real3 t0;
+	a3real4 t0;
 	a3real3Diff(t0, p, base.v);
 	
 
-	a3real3 t0Norm;
+	a3real4 t0Norm;
 	a3real3SetReal3(t0Norm, t0);
 	a3real3Normalize(t0Norm);
 
-	a3real3 t1;
+	a3real4 t1;
 	a3real3Diff(t1, end.v, p);
 
-	a3real3 t1Norm;
+	a3real4 t1Norm;
 	a3real3SetReal3(t1Norm, t1);
 	a3real3Normalize(t1Norm);
 
-	a3real3 b0;
+	a3real4 b0;
 	a3real3Cross(b0, t0Norm, nNorm);
 
-	a3real3 b0Norm;
+	a3real4 b0Norm;
 	a3real3SetReal3(b0Norm, b0);
 	a3real3Normalize(b0Norm);
 
-	a3real3 b1;
+	a3real4 b1;
 	a3real3Cross(b1, t1Norm, nNorm);
 
-	a3real3 b1Norm;
+	a3real4 b1Norm;
 	a3real3SetReal3(b1Norm, b1);
 	a3real3Normalize(b1Norm);
 
+
+	t0Norm[3] = 0;
+	b0Norm[3] = 0;
+	nNorm[3] = 0;
+	p[3] = 1;
 	a3real4x4 worldTjoint0;
 	a3real4x4SetMajors(worldTjoint0, t0Norm, b0Norm, nNorm, p);
-
+	
+	
+	t1Norm[3] = 0;
+	b1Norm[3] = 0;
+	nNorm[3] = 0;
+	p[3] = 1;
 	a3real4x4 worldTjoint1;
 	a3real4x4SetMajors(worldTjoint1, t1Norm, b1Norm, nNorm, p);
 
