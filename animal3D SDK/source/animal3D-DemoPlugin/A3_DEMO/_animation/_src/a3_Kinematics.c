@@ -344,11 +344,11 @@ void a3kinematicsUpdateLookAtIK(a3_HierarchyState const* sceneGraphState,
 	a3real4SetReal4(product[3], activeHS->objectSpace->hpose_base[hierarchyObjIndex_affected].transformMat.v3.v);
 	a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected, product);
 
-
 //-----------------------------------------------------------------------------
 //****END-TO-DO-PROJECT-3
 //-----------------------------------------------------------------------------
 }
+
 
 void a3kinematicsUpdateLimbIK(a3_HierarchyState const* sceneGraphState,
 	a3_HierarchyState* activeHS, a3_HierarchyState const* baseHS, a3_HierarchyPoseGroup const* poseGroup,
@@ -374,14 +374,15 @@ void a3kinematicsUpdateLimbIK(a3_HierarchyState const* sceneGraphState,
 //-----------------------------------------------------------------------------
 //****TO-DO-ANIM-PROJECT-3: IMPLEMENT ME
 //-----------------------------------------------------------------------------
+
 	//First:
 	//	wrist
 	//	pole vector constraint
-	a3real4x4 product;
-
-	//a3ui32 parentIndex = sceneGraphState->hierarchy->nodes[sceneGraphIndex_hierarchyObj].parentIndex;
+	a3real4x4 product; 
 	a3real4x4Product(product, sceneGraphState->objectSpaceInv->hpose_base[sceneGraphIndex_hierarchyObj].transformMat.m, sceneGraphState->objectSpace->hpose_base[sceneGraphIndex_effector_end].transformMat.m);
 	a3real4x4SetReal4x4(sceneGraphState->localSpace->hpose_base[sceneGraphIndex_effector_end].transformMat.m, product);
+	
+
 	//Main:
 	//a3real4x4 T;
 	//Solve joint-to-object for end, hinge,base
@@ -390,53 +391,109 @@ void a3kinematicsUpdateLimbIK(a3_HierarchyState const* sceneGraphState,
 	// -> hinge position*
 	
 	//1. base joint to end effector vector (and distance)
-	a3vec4 base = activeHS->objectSpace->hpose_base[hierarchyObjIndex_affected_base].transformMat.v3;
-	a3vec4 end = sceneGraphState->localSpace->hpose_base[sceneGraphIndex_effector_end].transformMat.v3;
-	a3real3 d;
+	a3vec4 base = sceneGraphState->objectSpace->hpose_base[hierarchyObjIndex_affected_base].transformMat.v3;
+	a3vec4 end = sceneGraphState->objectSpace->hpose_base[sceneGraphIndex_effector_end].transformMat.v3;
+
+	a3real3 d; //effector displacement
 	a3real3Diff(d, end.v, base.v);
-	a3real3Normalize(d);
+
+	a3real3 dNorm;
+	a3real3SetReal3(dNorm, d);
+	a3real3Normalize(dNorm);
+	
 	//2. base joint to pole vector constaint
+	
 	a3vec4 constraint = sceneGraphState->objectSpace->hpose_base[sceneGraphIndex_constraint].transformMat.v3;
+
+
 	a3real3 c;
 	a3real3Diff(c, constraint.v, base.v);
 	//3. plane normal = (base to pole) x (base to end)
 	a3real3 n;
 	a3real3Cross(n, c, d);
 
-	a3real3 h;
-	a3real3Cross(h, n, d);
+	a3real3 nNorm;
+	a3real3SetReal3(nNorm, n);
+	a3real3Normalize(nNorm);
+
+	a3real3 h; //is normalized
+	a3real3Cross(h, nNorm, dNorm);
+
+	a3real3 hNorm;
+	a3real3SetReal3(hNorm, h);
+	a3real3Normalize(hNorm);
+
 	//4. geometric (Heron's formula) or algebraic (law of cosines)
 	// ->solve elbow pos
 	a3real B = a3real3Length(d);
 	a3real L1 = a3real3Distance(constraint.v, base.v);
 	a3real L2 = a3real3Distance(end.v, constraint.v);
+
 	a3f32 s = 0.5f * (B + L1 + L2);
 	
-	a3f32 solve = s * (s - B) * (s - L1) * (s - L2);
-	
-	a3real A = a3sqrtf(a3absolute(solve));
+	a3real A = a3sqrtf(a3absolute(s * (s - B) * (s - L1) * (s - L2)));
 	
 	a3real H = (2 * A) / B;
 
 	a3real D = a3sqrtf(a3absolute((L1 * L1) - (H * H)));
 
 	a3real3 DProd, HProd;
-	a3real3ProductS(DProd, d, D);
-	a3real3ProductS(HProd, h, H);
+	a3real3ProductS(DProd, dNorm, D);
+	a3real3ProductS(HProd, hNorm, H);
 
-	a3real3Add(constraint.v, base.v);
-	a3real3Add(constraint.v, DProd);
-	a3real3Add(constraint.v, HProd);
-	a3real3x3 R;
-	a3real3x3SetMajors(R, base.v, constraint.v, end.v);
+	a3real3 p; //elbow's offset from base effector
+	a3real3Add(p, base.v);
+	a3real3Add(p, DProd);
+	a3real3Add(p, HProd);
+
+	a3real3 t0;
+	a3real3Diff(t0, p, base.v);
+	
+
+	a3real3 t0Norm;
+	a3real3SetReal3(t0Norm, t0);
+	a3real3Normalize(t0Norm);
+
+	a3real3 t1;
+	a3real3Diff(t1, end.v, p);
+
+	a3real3 t1Norm;
+	a3real3SetReal3(t1Norm, t1);
+	a3real3Normalize(t1Norm);
+
+	a3real3 b0;
+	a3real3Cross(b0, t0Norm, nNorm);
+
+	a3real3 b0Norm;
+	a3real3SetReal3(b0Norm, b0);
+	a3real3Normalize(b0Norm);
+
+	a3real3 b1;
+	a3real3Cross(b1, t1Norm, nNorm);
+
+	a3real3 b1Norm;
+	a3real3SetReal3(b1Norm, b1);
+	a3real3Normalize(b1Norm);
+
+	a3real4x4 worldTjoint0;
+	a3real4x4SetMajors(worldTjoint0, t0Norm, b0Norm, nNorm, p);
+
+	a3real4x4 worldTjoint1;
+	a3real4x4SetMajors(worldTjoint1, t1Norm, b1Norm, nNorm, p);
+
+
+	//a3real3x3 R;
+	//a3real3x3SetMajors(R, base.v, constraint.v, end.v);
+
 	//5. "look at" solve shoulder and elbow rotations
 	a3kinematicsUpdateLookAtIK(sceneGraphState, activeHS, baseHS, poseGroup, sceneGraphIndex_hierarchyObj, sceneGraphIndex_constraint, hierarchyObjIndex_affected_hinge, basis_hierarchyObj, basis_affected_end);
 	a3kinematicsUpdateLookAtIK(sceneGraphState, activeHS, baseHS, poseGroup, sceneGraphIndex_hierarchyObj, sceneGraphIndex_constraint, hierarchyObjIndex_affected_hinge, basis_hierarchyObj, basis_affected_base);
+
 	//Last:
 	//	work from root to leaf
-	//a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_base, product);
-	//a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_hinge, product);
-	//a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_end, product);
+	a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_base, worldTjoint0);
+	a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_hinge, worldTjoint1);
+	a3kinematicsResolvePostIK(activeHS, baseHS, poseGroup, hierarchyObjIndex_affected_end, product);
 //-----------------------------------------------------------------------------
 //****END-TO-DO-PROJECT-3
 //-----------------------------------------------------------------------------
