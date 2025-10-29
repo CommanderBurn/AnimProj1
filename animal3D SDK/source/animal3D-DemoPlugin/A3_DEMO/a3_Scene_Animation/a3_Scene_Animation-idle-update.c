@@ -35,6 +35,9 @@
 
 #include "../_a3_scene_utilities/a3_SceneMacros.h"
 
+#include "stdlib.h"
+#include <string.h>
+
 
 //-----------------------------------------------------------------------------
 // UTILS
@@ -213,6 +216,7 @@ void a3animation_update_animation_skeletal(
 		a3_HierarchyState* activeHS_tree = &scene->hierarchyState_skel_blend[h];
 		a3ui32 sampleIndex0, sampleIndex1;
 
+
 		// update clip controller, keyframe lerp
 		a3clipControllerUpdate(clipCtrl_fk, dt);
 		sampleIndex0 = scene->clipPool->keyframe[clipCtrl_fk->keyframeIndex].sampleIndex0;
@@ -225,6 +229,7 @@ void a3animation_update_animation_skeletal(
 	// do blending here
 	//	-> interpolate idle_f/idle_m -> idle_fm
 	//	-> interpolate idle_fm/idle_p -> result
+
 	a3hierarchyPoseLerp(scene->hierarchyState_skel_blend_idle_fm_blend->animPose,	// dst: idle_fm
 		scene->hierarchyState_skel_blend_idle_f->animPose,							// src(0): idle_f
 		scene->hierarchyState_skel_blend_idle_m->animPose,							// src(1): idle_m

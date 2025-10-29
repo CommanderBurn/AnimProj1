@@ -32,6 +32,8 @@
 
 #include "../a3_DemoState.h"
 
+#include "stdlib.h"
+
 
 //-----------------------------------------------------------------------------
 
@@ -742,6 +744,23 @@ void a3animation_init_animation(a3_DemoState const* demoState, a3_Scene_Animatio
 			a3animation_load_resetEffectors(scene, scene->hierarchyState_skel_fk, hierarchyPoseGroup);
 		}
 	}
+
+	a3_SpatialPoseBlendTree* tree;
+	tree = (a3_SpatialPoseBlendTree*)malloc(hierarchyState->hierarchy->numNodes * sizeof(a3_SpatialPoseBlendTree));
+	tree->nodes = (a3_SpatialPoseBlendNode*)malloc(hierarchyState->hierarchy->numNodes * sizeof(a3_SpatialPoseBlendNode));
+	a3real half = 0.5f;
+	for (a3ui32 i = 0; i < hierarchyState->hierarchy->numNodes; ++i)
+	{
+		tree->nodes[i].blendOpSet = scene->blendOpLERP;
+		tree->nodes[i].pose_ctrl[0] = hierarchyState->animPose[i].hpose_base;
+		if(i != 0)
+			tree->nodes[i].pose_ctrl[1] = hierarchyState->animPose[i+1].hpose_base;
+		tree->nodes[i].pose_out = hierarchyState->animPose[i].hpose_base;
+		tree->nodes[i].u[0] = &half;
+		tree->nodes[i].uCount = hierarchyState->hierarchy->numNodes;
+		tree->nodes[i].vCount = hierarchyState->hierarchy->numNodes;
+	}
+	a3spatialPoseBlendTreeCreate(tree, hierarchyState->hierarchy);
 }
 
 

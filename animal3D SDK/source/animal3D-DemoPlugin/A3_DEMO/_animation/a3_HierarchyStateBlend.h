@@ -169,6 +169,9 @@ a3ret a3spatialPoseBlendTreeConfigureNode(a3_SpatialPoseBlendTree const* blendTr
 a3ret a3spatialPoseBlendTreeExecute(a3_SpatialPoseBlendTree const* blendTree);
 
 
+// add spatial/hierarchy pose to blendTree
+
+
 //-----------------------------------------------------------------------------
 
 // pointer-based reset/identity operation for single spatial pose

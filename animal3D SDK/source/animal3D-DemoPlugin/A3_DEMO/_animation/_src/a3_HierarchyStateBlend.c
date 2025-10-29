@@ -37,6 +37,9 @@ a3ret a3spatialPoseBlendTreeCreate(a3_SpatialPoseBlendTree* blendTree, a3_Hierar
 {
 	if (!blendTree || !blendTreeDescriptor)
 		return -1;
+
+	for(a3ui32 i = 0; i < blendTreeDescriptor->numNodes; ++i)
+	blendTree[i].blendTreeDescriptor = &blendTreeDescriptor[i];
 	return 0;
 }
 
@@ -74,26 +77,35 @@ a3real4r a3blendOpRET4(a3real4 v_out)
 
 a3real4r a3blendOpZERO4(a3real4 v_out)
 {
+	v_out = 0;
 	return v_out;
 }
 
 a3real4r a3blendOpONE4(a3real4 v_out)
 {
+	a3real4 v;
+	a3real4Set(v, 1, 1, 1, 1);
+	a3real4SetReal4(v_out, v);
 	return v_out;
 }
 
 a3real4r a3blendOpID4(a3real4 v_out)
 {
+	v_out = 0;
 	return v_out;
 }
 
 a3real4r a3blendOpCOPY4(a3real4 v_out, a3real4 const v)
 {
+	a3real4SetReal4(v_out, v);
 	return v_out;
 }
 
 a3real4r a3blendOpNEGATE4(a3real4 v_out, a3real4 const v)
 {
+	a3real4 negate;
+	a3real4ProductS(negate, v, -1);
+	a3real4SetReal4(v_out, negate);
 	return v_out;
 }
 
@@ -104,26 +116,36 @@ a3real4r a3blendOpRECIP4(a3real4 v_out, a3real4 const v)
 
 a3real4r a3blendOpCONJQ4(a3real4 v_out, a3real4 const v)
 {
+
 	return v_out;
 }
 
 a3real4r a3blendOpADD4(a3real4 v_out, a3real4 const v0, a3real4 const v1)
 {
+	a3real4Add(v_out, v0);
+	a3real4Add(v_out, v1);
 	return v_out;
 }
 
 a3real4r a3blendOpSUB4(a3real4 v_out, a3real4 const v0, a3real4 const v1)
 {
+	a3real4Diff(v_out, v0, v1);
 	return v_out;
 }
 
 a3real4r a3blendOpMUL4(a3real4 v_out, a3real4 const v0, a3real4 const v1)
 {
+	a3real4ProductComp(v_out, v0, v1);
 	return v_out;
 }
 
 a3real4r a3blendOpDIV4(a3real4 v_out, a3real4 const v0, a3real4 const v1)
 {
+	a3real4 one;
+	a3real4Set(one, 1, 1, 1, 1);
+	a3real4 inv;
+	a3real4QuotientComp(inv, one, v1);
+	a3real4ProductComp(v_out, v0, inv);
 	return v_out;
 }
 
@@ -144,6 +166,7 @@ a3real4r a3blendOpSCALE4(a3real4 v_out, a3real4 const v, a3real const u)
 
 a3real4r a3blendOpPOW4(a3real4 v_out, a3real4 const v, a3real const u)
 {
+	
 	return v_out;
 }
 
@@ -154,6 +177,9 @@ a3real4r a3blendOpNEAR4(a3real4 v_out, a3real4 const v0, a3real4 const v1, a3rea
 
 a3real4r a3blendOpLERP4(a3real4 v_out, a3real4 const v0, a3real4 const v1, a3real const u)
 {
+	a3real4Diff(v_out, v1, v0);
+	a3real4ProductS(v_out, v_out, u);
+	a3real4Add(v_out, v0);
 	return v_out;
 }
 
@@ -246,11 +272,13 @@ a3real4r a3blendOpID4X4(a3real4 m_out)
 
 a3real4r a3blendOpCOPY4X4(a3real4 m_out, a3real4 const m)
 {
+	a3real4SetReal4(m_out, m);
 	return m_out;
 }
 
 a3real4r a3blendOpINVR4X4(a3real4 m_out, a3real4 const m)
 {
+	a3real4ProductS(m_out, m, -1);
 	return m_out;
 }
 
@@ -266,16 +294,29 @@ a3real4r a3blendOpMULINVR4X4(a3real4 m_out, a3real4 const m0, a3real4 const m1)
 
 a3real4r a3blendOpSCALE4X4(a3real4 m_out, a3real4 const m, a3real const u)
 {
+	
 	return m_out;
 }
 
 a3real4r a3blendOpNEAR4X4(a3real4 m_out, a3real4 const m0, a3real4 const m1, a3real const u)
 {
+	a3real4Diff(m_out, m1, m0);
+	a3real4ProductS(m_out, m_out, u);
+	a3real4Add(m_out, m0);
+	if (a3real4Length(m_out) >= 0.5)
+	{
+		a3real4SetReal4(m_out, m1);
+	}
+	else
+		a3real4SetReal4(m_out, m0);
 	return m_out;
 }
 
 a3real4r a3blendOpLERP4X4(a3real4 m_out, a3real4 const m0, a3real4 const m1, a3real const u)
 {
+	a3real4Diff(m_out, m1, m0);
+	a3real4ProductS(m_out,m_out, u);
+	a3real4Add(m_out, m0);
 	return m_out;
 }
 
@@ -297,6 +338,9 @@ a3_SpatialPose* a3spatialPoseOpLERP(a3_SpatialPose* pose_out, a3_SpatialPose con
 {
 
 	// done
+	a3real4Diff(pose_out->transformMat.v3.v, pose1->transformMat.v3.v, pose0->transformMat.v3.v);
+	a3real4ProductS(pose_out->transformMat.v3.v, pose_out->transformMat.v3.v, u);
+	a3real4Add(pose_out->transformMat.v3.v, pose0->transformMat.v3.v);
 	return pose_out;
 }
 
@@ -306,7 +350,10 @@ a3_SpatialPose* a3spatialPoseOpLERP(a3_SpatialPose* pose_out, a3_SpatialPose con
 // pointer-based reset/identity operation for hierarchical pose
 a3_HierarchyPose* a3hierarchyPoseOpIdentity(a3_HierarchyPose* pose_out)
 {
-
+	pose_out->hpose_base->transformMat = a3mat4_identity;
+	//a3real4 negate;
+	//a3real4ProductS(negate, pose_out->hpose_base->transformMat.v3.v, -1);
+	//a3real4Diff(pose_out->hpose_base->transformMat.v3.v,pose_out->hpose_base->transformMat.v3.v, negate);
 	// done
 	return pose_out;
 }
@@ -316,6 +363,9 @@ a3_HierarchyPose* a3hierarchyPoseOpLERP(a3_HierarchyPose* pose_out, a3_Hierarchy
 {
 
 	// done
+	a3real4Diff(pose_out->hpose_base->transformMat.v3.v, pose1->hpose_base->transformMat.v3.v, pose0->hpose_base->transformMat.v3.v);
+	a3real4ProductS(pose_out->hpose_base->transformMat.v3.v, pose_out->hpose_base->transformMat.v3.v, u);
+	a3real4Add(pose_out->hpose_base->transformMat.v3.v, pose0->hpose_base->transformMat.v3.v);
 	return pose_out;
 }
 
